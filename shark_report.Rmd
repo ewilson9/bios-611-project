@@ -1,0 +1,25 @@
+```{r}
+source("utils.R")
+ensure_directory("reports")
+```
+
+Emma Wilson's shark attack (skeleton) report for the BIOS 611 midterm. (Please work)
+
+Data was found here:
+https://www.kaggle.com/felipeesc/shark-attack-dataset
+
+This data collects all known shark attacks across the world, including provoked attacks, boating incidents, shipwrecks, and human remains found inside of sharks, along with as much information was known about the date, location, victim, and incident itself. Because the data goes back over 200 years, much of the information is missing or not really standardized between entries, but there is still a lot of interesting data here to analyze!
+
+The data has been semi-cleaned, but the more complicated columns (especially shark species) still need lots of work. This is a work in progress.
+
+The vast majority of attack types reported were unprovoked and the majority of victims were male, so I wanted to quickly look at the type and sex categories and see how they related to fatality rates in the attacks. 
+
+Looking at how sex correlates to fatality rate after normalizing sex counts, we see that men are slightly more likely to die to a shark attack. 
+
+![Shark attack fatality by victim's sex](figures/shark_sex_fatality.png)
+
+Looking at how accident type correlates to fatality rate after normalizing type counts, we see that 70% of sea disasters were fatal, 26% of unprovoked attacks were fatal, and only 3% of provoked attacks and boating attacks were fatal. Very interesting that unprovoked attacks were more fatal than provoked attacks - perhaps that represents the hungry shark versus the shark who happened to be in the wrong place at the wrong time?
+
+![Shark attack fatality by accident type](figures/shark_type_fatality.png)
+
+.
