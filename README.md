@@ -16,8 +16,8 @@ docker run -e PASSWORD=<your_password> -p 8787:8787 -v $(pwd):/home/rstudio/proj
 ```
 
 Once the image is running, connect to it by visiting
-https://localhost:8787 in your browser. 
-username:Rstudio password:<your_password>
+localhost:8787 in your browser. 
+username:rstudio password:<your_password>
 
 To build the final report, open the terminal in RStudio and type
 
