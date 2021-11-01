@@ -22,6 +22,7 @@ username:rstudio password:<your_password>
 To build the final report, open the terminal in RStudio and type
 
 ```
+cd project/
 make reports/midterm_report.pdf
 ```
 
