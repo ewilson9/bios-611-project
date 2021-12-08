@@ -1,0 +1,142 @@
+
+
+
+```{r}
+library(tidyverse)
+library(dplyr)
+
+```
+
+```{r}
+dat <- read_csv("source_data/shark_attacks.csv")
+head(dat)
+dat <- rename(dat, ID='Case Number...1') %>% rename(Fatal='Fatal (Y/N)')
+
+
+simplify_strings <- function(s){
+    s %>% 
+        str_to_lower() %>%
+        str_trim() %>%
+        str_replace_all("[^a-z1-9]+","_") %>%
+        str_replace_all("^_+","") %>% # added these lines after looking at the data
+        str_replace_all("_+$","");
+}
+
+# Simplify strings, replace NAs (I couldn't figure out how to do all columns at once), filter out rows with bad info
+names(dat) <- simplify_strings(names(dat))
+
+nrow(dat)
+tidy_sharks <-  dat %>% mutate(across(everything(), simplify_strings)) %>%
+  replace_na(list(sex = "unknown", age = "unknown", injury = "unknown", fatal = "unknown", species = "unknown")) %>%
+  filter(date != "NA") %>%
+  filter(sex == "f" | sex == "m" | sex == "unknown") %>%
+  filter(fatal == "y" | fatal == "n" | fatal == "unknown")
+tidy_sharks$type <- str_replace(tidy_sharks$type, "boating|boatomg|boat", "boating")
+nrow(tidy_sharks)
+
+head(sort(table(tidy_sharks$country), decreasing=TRUE))
+just_usa <- filter(tidy_sharks, country=="usa")
+head(sort(table(just_usa$area), decreasing=TRUE))
+
+
+head(sort(table(tidy_sharks$species), decreasing=TRUE))
+# Need to clean up species column
+
+# Need to normalize tidy_sharks, possibly drop 100+ year old cases
+# tidy_sharks are either "11-Jan-18" or "Reported 11-Jan-2018"
+
+sort(table(tidy_sharks$type), decreasing=TRUE)
+# Change "Boat" and "Boatomg" to "Boating", otherwise seems standardized
+
+head(sort(table(tidy_sharks$name), decreasing=TRUE), n=50)
+# I thought to see if any names came up more than once but the names column does not seem to be very helpful, perhaps ignore for now. 
+
+head(sort(table(tidy_sharks$injury), decreasing=TRUE), n=20)
+# Eek, need to standardize this. Maybe make categories "Fatal" "Leg/Foot" "None" "Arm/Hand" "Minor Injury" ...
+
+sort(table(tidy_sharks$fatal, decreasing=TRUE))
+
+head(sort(table(tidy_sharks$activity), decreasing=TRUE, n=20))
+# Remove smaller count activities?
+
+
+
+write_csv(tidy_sharks, "derived_data/tidy_sharks.csv")
+```
+
+
+
+```{r}
+# Interesting plots: Bar plots of year(s) by incidents, year(s) by deaths, year(s) by survival rate (non-fatal/incidents)
+#     Bar plots of Countries, Provoked by survival rate
+#     Something about species... species by survival rate, or incidence
+
+
+```
+
+It looks like I don't need to "tidy" the data as in class, as this table is already in a wide format and can skip straight into making tables and plots
+
+I need to read in the derived tidy_sharks.csv file in this section.
+
+```{r}
+sex_fatality <- tidy_sharks %>%
+    group_by(sex , fatal) %>%
+    tally()
+sex_fatality
+```
+
+```{r}
+fatal_counts <- tidy_sharks %>%
+    group_by(sex, fatal) %>%
+    tally()
+fatal_counts
+
+sex_counts <- tidy_sharks %>%
+    group_by(sex) %>%
+    tally()
+sex_counts
+
+fatal_probs <- fatal_counts %>%
+    left_join(sex_counts, by="sex", suffix=c("",".sex")) %>%
+    mutate(p=n/n.sex)
+
+fatal_sex_status <- fatal_probs %>%
+    filter(sex %in% c("m","f") & fatal %in% c("y","n")) %>%
+    arrange(desc(p))
+fatal_sex_status
+```
+17% of female and 23% of male attacks were fatal.
+
+```{r}
+ggplot(data=fatal_sex_stats, aes(x=sex, y=p, fill=fatal)) +
+  geom_bar(stat="identity", color="black", position=position_dodge()) + 
+  labs(x="Gender of Victim", y="p-value", fill="Fatality")
+```
+
+```{r}
+fatal_type_counts <- tidy_sharks %>%
+    group_by(type, fatal) %>%
+    tally()
+fatal_type_counts
+
+type_counts <- tidy_sharks %>%
+    group_by(type) %>%
+    tally()
+type_counts
+
+fatal_type_probs <- fatal_type_counts %>%
+    left_join(type_counts, by="type", suffix=c("",".type")) %>%
+    mutate(p=n/n.type)
+
+fatal_type_stats <- fatal_type_probs %>%
+    filter(type %in% c("unprovoked", "provoked", "boating", "sea_disaster") & fatal %in% c("y","n")) %>%
+    arrange(desc(type))
+fatal_type_stats
+```
+70% of sea disasters were fatal, 26% of unprovoked attacks were fatal, 3% of provoked attacks and boating attacks were fatal.
+
+```{r}
+ggplot(data=fatal_type_stats, aes(x=type, y=p, fill=fatal)) +
+  geom_bar(stat="identity", color="black", position=position_dodge()) + 
+  labs(x="Accident Type", y="p-value", fill="Fatality")
+```

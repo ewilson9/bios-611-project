@@ -26,7 +26,7 @@ fatal_sex_status
 
 sex_stats_plot <- ggplot(data=fatal_sex_status, aes(x=sex, y=p, fill=fatal)) +
   geom_bar(stat="identity", color="black", position=position_dodge()) + 
-  labs(x="Gender of Victim", y="p-value", fill="Fatality")
+  labs(x="Sex of Victim", y="p-value", fill="Fatality?")
 
 ensure_directory("figures")
 ggsave("figures/shark_sex_fatality.png", sex_stats_plot)
@@ -50,11 +50,17 @@ fatal_type_status <- fatal_type_probs %>%
   arrange(desc(type))
 fatal_type_status
 
+# Rearrange x axis
+fatal_type_status$type <- factor(fatal_type_status$type,levels = c("unprovoked", "provoked", "boating", "sea_disaster"))
+
 type_stats_plot <- ggplot(data=fatal_type_status, aes(x=type, y=p, fill=fatal)) +
   geom_bar(stat="identity", color="black", position=position_dodge()) + 
-  labs(x="Accident Type", y="p-value", fill="Fatality")
+  labs(x="Accident Type", y="p-value", fill="Fatality?")
 
 ggsave("figures/shark_type_fatality.png", type_stats_plot)
+
+
+
 
 
 
