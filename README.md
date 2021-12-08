@@ -29,6 +29,7 @@ username:rstudio password:pw
 To build the final report, open the terminal in RStudio and type
 
 ```
+cd project/
 make reports/final_shark_report.pdf
 ```
 
